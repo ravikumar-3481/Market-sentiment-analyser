@@ -158,7 +158,7 @@ def detect_topic(text):
 def render_navigation():
     st.markdown("<br>", unsafe_allow_html=True)
     cols = st.columns(5)
-    nav_items = ["Home", "Dashboard", "Market Data", "Scraped Articles", "About"]
+    nav_items = ["Home", "Dashboard", "Scraped Articles", "Market Data", "About"]
     
     for i, col in enumerate(cols):
         if col.button(f"🚀 {nav_items[i]}", key=f"nav_{nav_items[i]}", use_container_width=True):
@@ -224,7 +224,7 @@ def page_dashboard():
     
     col_search, col_btn = st.columns([4, 1])
     with col_search:
-        query = st.text_input("Enter Ticker or Topic (e.g., TSLA, AI Regulations, Inflation)", value=st.session_state.search_query)
+        query = st.text_input("Enter Ticker or Topic ", placeholder= "(e.g., TSLA, AI Regulations, Inflation)")
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Fetch & Analyze News", type="primary", use_container_width=True):
@@ -298,7 +298,7 @@ def page_market_data():
     
     col_input, col_load = st.columns([3, 1])
     with col_input:
-        ticker = st.text_input("Enter Exact Stock Ticker (e.g., AAPL, TSLA, MSFT, BTC-USD):", value="AAPL")
+        ticker = st.text_input("Enter Exact Stock Ticker ", placeholder = "(e.g., AAPL, TSLA, MSFT, BTC-USD):")
     with col_load:
         st.markdown("<br>", unsafe_allow_html=True)
         btn_load = st.button("Load Live Market Data", type="primary", use_container_width=True)
@@ -431,7 +431,7 @@ def page_article_view():
         
     col_back, _ = st.columns([1, 5])
     with col_back:
-        if st.button("⬅ Back to Headlines", use_container_width=True):
+        if st.button("⬅ Back", use_container_width=True):
             st.session_state.page = "Scraped Articles"
             st.rerun()
         
@@ -526,8 +526,8 @@ def main():
     pages = {
         'Home': page_home,
         'Dashboard': page_dashboard,
-        'Market Data': page_market_data,
         'Scraped Articles': page_articles,
+        'Market Data': page_market_data,
         'Article View': page_article_view,
         'About': page_about
     }
