@@ -65,8 +65,12 @@ tokenizer, finbert_model, vader_analyzer = load_models()
 # ==========================================
 def fetch_rss_news(query, limit=10):
     """Fetches news from Google News RSS feed."""
-    encoded_query = quote(query)
-    url = f"https://news.google.com/rss/search?q={encoded_query} when:1d&hl=en-US&gl=US&ceid=US:en"
+    # Combine the query with the time filter BEFORE encoding
+    full_query = f"{query} when:1d"
+    encoded_query = quote(full_query)
+    
+    # Construct the final URL without any raw spaces
+    url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
     feed = feedparser.parse(url)
     
     articles = []
