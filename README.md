@@ -132,7 +132,7 @@ MarketPulse AI solves all three problems through a **Centralized Intelligence Pi
 <div align="center">
 
 ### 🏠 Home — ML Pipeline Overview
-<img src="assets/home.png" alt="Home Page" width="90%" />
+<img src="assets/Home.png" alt="Home Page" width="90%" />
 
 <br/>
 
@@ -142,12 +142,12 @@ MarketPulse AI solves all three problems through a **Centralized Intelligence Pi
 <br/>
 
 ### 📈 Market Data — Live Stock Chart
-<img src="assets/stock.png" alt="Market Data" width="90%" />
+<img src="assets/Stock.png" alt="Market Data" width="90%" />
 
 <br/>
 
 ### 🔍 Deep-Dive Analysis
-<img src="assets/scraped.png" alt="Deep Dive" width="90%" />
+<img src="assets/Scrap.png" alt="Deep Dive" width="90%" />
 
 </div>
 
