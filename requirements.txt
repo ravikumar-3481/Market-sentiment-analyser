@@ -1,0 +1,11 @@
+streamlit
+feedparser
+requests
+beautifulsoup4
+textblob
+vaderSentiment
+transformers
+torch
+numpy
+pandas
+plotly
