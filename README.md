@@ -28,7 +28,7 @@
 <!-- CTA BUTTONS -->
 [![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-1B3A6B?style=for-the-badge)](https://market-sentiment-analyser-ravikumar-3481.streamlit.app/)
 &nbsp;
-[![📄 Project Report](https://img.shields.io/badge/📄%20Project%20Report-View%20PDF-0F7B8C?style=for-the-badge)](https://your-project-report-link.com)
+[![📄 Project Report](https://img.shields.io/badge/📄%20Project%20Report-View%20PDF-0F7B8C?style=for-the-badge)](MarketPulse_AI_Project_Report.pdf)
 
 </div>
 
