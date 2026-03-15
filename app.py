@@ -201,7 +201,7 @@ def page_dashboard():
     
     col_search, col_btn = st.columns([4, 1])
     with col_search:
-        query = st.text_input("Enter Ticker or Topic (e.g., NVDA, Tech Stocks, Inflation):", value=st.session_state.search_query)
+        query = st.text_input("Enter Ticker or Topic", placeholder = "(e.g., NVDA, Tech Stocks, Inflation):")
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
         fetch_clicked = st.button("Fetch & Analyze", type="primary", use_container_width=True)
@@ -348,8 +348,8 @@ def page_about():
     
     col1, col2 = st.columns([1, 2])
     with col1:
-        st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=250)
-        st.markdown("### Python Developer")
+        st.image("https://github.com/ravikumar-3481/profileravi/blob/main/og/img.webp", width=250)
+        st.markdown("### Ravi Vishwakarma")
         st.write("**Focus:** AI/ML, Data Engineering, Web Apps")
         st.write("**Mission:** Bridging the gap between raw data and actionable financial intelligence.")
         
