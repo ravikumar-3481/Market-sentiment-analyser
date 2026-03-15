@@ -14,6 +14,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import yfinance as yf
 import re
+import warnings
+
+# Suppress warnings for cleaner logs
+warnings.filterwarnings("ignore")
 
 # ==========================================
 # PAGE CONFIGURATION & STYLING
@@ -46,29 +50,33 @@ if 'search_query' not in st.session_state:
     st.session_state.search_query = "NVDA"
 
 # ==========================================
-# AI MODELS & CACHING
+# AI MODELS (LAZY LOADING FOR MEMORY SAFETY)
 # ==========================================
-@st.cache_resource(show_spinner="Loading Heavy AI Models (FinBERT, Summarizer, NER, Zero-Shot)... This may take a minute on first run.")
-def load_models():
-    # 1. FinBERT for Financial Sentiment
-    tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
-    finbert_model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
-    
-    # 2. VADER
-    vader = SentimentIntensityAnalyzer()
-    
-    # 3. Summarization (DistilBART - fast)
-    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-    
-    # 4. Zero-Shot Classification for Topic Modeling
-    topic_classifier = pipeline("zero-shot-classification", model="typeform/distilbert-base-uncased-mnli")
-    
-    # 5. Named Entity Recognition (NER)
-    ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
-    
-    return tokenizer, finbert_model, vader, summarizer, topic_classifier, ner_pipeline
+# We load models separately to prevent Streamlit Cloud from crashing due to Out-Of-Memory (OOM) errors.
 
-tokenizer, finbert_model, vader_analyzer, summarizer_pipe, topic_pipe, ner_pipe = load_models()
+@st.cache_resource(show_spinner="Loading FinBERT Sentiment Engine...")
+def load_finbert():
+    tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
+    model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+    return tokenizer, model
+
+@st.cache_resource(show_spinner="Loading Lexicon Engine...")
+def load_vader():
+    return SentimentIntensityAnalyzer()
+
+@st.cache_resource(show_spinner="Loading AI Topic Classifier...")
+def load_topic_model():
+    return pipeline("zero-shot-classification", model="typeform/distilbert-base-uncased-mnli")
+
+@st.cache_resource(show_spinner="Loading AI Summarizer...")
+def load_summarizer():
+    # Using Falconsai as it is highly efficient and won't crash Streamlit's 1GB RAM limit
+    return pipeline("summarization", model="Falconsai/text_summarization")
+
+@st.cache_resource(show_spinner="Loading Entity Extractor...")
+def load_ner():
+    return pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
+
 
 # ==========================================
 # HELPER FUNCTIONS
@@ -126,6 +134,9 @@ def scrape_full_article(url):
         return "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop", "Could not load full article."
 
 def analyze_sentiment(text):
+    tokenizer, finbert_model = load_finbert()
+    vader_analyzer = load_vader()
+    
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
     with torch.no_grad():
         outputs = finbert_model(**inputs)
@@ -139,6 +150,7 @@ def analyze_sentiment(text):
     }
 
 def detect_topic(text):
+    topic_pipe = load_topic_model()
     candidate_labels = ["Earnings", "Mergers & Acquisitions", "Macroeconomics", "Leadership/Management", "Regulatory/Legal"]
     result = topic_pipe(text, candidate_labels)
     return result['labels'][0]
@@ -194,7 +206,7 @@ def page_dashboard():
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("Fetch & Analyze", type="primary", use_container_width=True):
             st.session_state.search_query = query
-            with st.spinner(f"Scraping & running Heavy AI Pipelines for '{query}'..."):
+            with st.spinner(f"Scraping & running AI Pipelines for '{query}'..."):
                 articles = fetch_rss_news(query, limit=20)
                 for art in articles:
                     combined_text = art['title'] + ". " + art['summary']
@@ -265,6 +277,7 @@ def page_market_data():
                 reddit_posts = fetch_reddit_sentiment(ticker)
             
             if reddit_posts:
+                vader_analyzer = load_vader()
                 pos_count = 0
                 neg_count = 0
                 for post in reddit_posts:
@@ -331,6 +344,7 @@ def page_article_view():
         if st.button("Generate Summary"):
             with st.spinner("Neural network is reading the text..."):
                 if len(full_content) > 300:
+                    summarizer_pipe = load_summarizer()
                     summary = summarizer_pipe(full_content[:2000], max_length=130, min_length=30, do_sample=False)
                     st.success(summary[0]['summary_text'])
                 else:
@@ -340,6 +354,7 @@ def page_article_view():
         st.markdown("### Named Entity Recognition (NER)")
         if st.button("Extract Entities"):
             with st.spinner("Extracting..."):
+                ner_pipe = load_ner()
                 entities = ner_pipe(full_content[:2000])
                 # Deduplicate and format entities
                 unique_entities = {"ORG": set(), "PER": set(), "LOC": set(), "MISC": set()}
@@ -366,8 +381,9 @@ def page_about():
         st.write("""
         This app uses a multi-model ensemble approach:
         - **Data Pipelines:** `feedparser`, `yfinance`, `beautifulsoup4`.
-        - **NLP Transformers:** HuggingFace `pipeline` routing 4 distinct neural networks (FinBERT for sentiment, DistilBART for Summarization, BERT for NER, DistilBART-MNLI for Topic classification).
+        - **NLP Transformers:** HuggingFace `pipeline` routing 4 distinct neural networks (FinBERT for sentiment, Falconsai for Summarization, BERT for NER, DistilBERT-MNLI for Topic classification).
         - **Data Viz:** `plotly` & `pandas`.
+        - **Memory Optimization:** Implements aggressive Lazy-Loading via discrete `@st.cache_resource` states to run efficiently on cloud environments.
         """)
 
 def main():
