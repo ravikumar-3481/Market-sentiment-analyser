@@ -230,7 +230,7 @@ def page_dashboard():
         if st.button("Fetch & Analyze News", type="primary", use_container_width=True):
             st.session_state.search_query = query
             with st.spinner(f"Scraping Web & running FinBERT for '{query}'..."):
-                articles = fetch_rss_news(query, limit=200 >= 500 )
+                articles = fetch_rss_news(query, limit=200 => 500 )
                 for art in articles:
                     combined_text = art['title'] + ". " + art['summary']
                     sentiment_results = analyze_sentiment(combined_text)
