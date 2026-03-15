@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- BANNER IMAGE -->
-<img src="https://your-screenshot-url.com/banner.png" alt="MarketPulse AI Banner" width="100%" />
+<img src="assets/1773568802362.png" alt="MarketPulse AI Banner" width="100%" />
 
 <br/>
 <br/>
