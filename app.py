@@ -348,7 +348,7 @@ def page_about():
     
     col1, col2 = st.columns([1, 2])
     with col1:
-        st.image("https://github.com/ravikumar-3481/profileravi/blob/main/og/img.webp", width=250)
+        st.image("https://profileravi.netlify.app/og/img.webp", width=250)
         st.markdown("### Ravi Vishwakarma")
         st.write("**Focus:** AI/ML, Data Engineering, Web Apps")
         st.write("**Mission:** Bridging the gap between raw data and actionable financial intelligence.")
