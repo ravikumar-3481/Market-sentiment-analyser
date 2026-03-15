@@ -209,7 +209,7 @@ def page_dashboard():
     if fetch_clicked:
         st.session_state.search_query = query
         with st.spinner(f"Scraping web & running Deep Learning inference for '{query}'..."):
-            articles = fetch_rss_news(query, limit=15)
+            articles = fetch_rss_news(query, limit=100)
             
             # Run inference on fetched articles
             for art in articles:
