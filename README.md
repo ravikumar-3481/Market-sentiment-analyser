@@ -257,7 +257,7 @@ praw
 &nbsp;
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ravi-vishwakarma67)
 &nbsp;
-[![Portfolio](https://img.shields.io/badge/Twitter-000000)](https://profileravi.netlify.app)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=Portfolio&logoColor=white)](https://profileravi.netlify.app)
 &nbsp;
 [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:ravivish968@gmail.com)
 
