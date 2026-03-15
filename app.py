@@ -24,13 +24,7 @@ st.markdown("""
     <style>
         [data-testid="collapsedControl"] { display: none; }
         section[data-testid="stSidebar"] { display: none; }
-        .nav-btn { width: 100%; border-radius: 5px; font-weight: bold; }
-        .stButton>button { width: 100%; border-radius: 8px; transition: 0.3s; }
-        .stButton>button:hover { border-color: #00FF41; color: #00FF41; }
         .article-card { padding: 20px; border-radius: 10px; background-color: #1E1E1E; margin-bottom: 20px; border: 1px solid #333; }
-        .sentiment-pos { color: #00FF41; font-weight: bold; }
-        .sentiment-neg { color: #FF003C; font-weight: bold; }
-        .sentiment-neu { color: #FFAA00; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -64,14 +58,24 @@ tokenizer, finbert_model, vader_analyzer = load_models()
 # HELPER FUNCTIONS (Scraping & NLP)
 # ==========================================
 def fetch_rss_news(query, limit=10):
-    """Fetches news from Google News RSS feed."""
-    # Combine the query with the time filter BEFORE encoding
-    full_query = f"{query} when:1d"
-    encoded_query = quote(full_query)
+    """Fetches news from Google News RSS feed using requests for safe URL encoding."""
+    query = str(query).strip()
+    url = "https://news.google.com/rss/search"
+    params = {
+        "q": f"{query} when:1d",
+        "hl": "en-US",
+        "gl": "US",
+        "ceid": "US:en"
+    }
     
-    # Construct the final URL without any raw spaces
-    url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(url)
+    try:
+        # Using requests to safely handle all URL encoding and special characters
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        # Parse the raw XML content safely
+        feed = feedparser.parse(response.content)
+    except Exception as e:
+        return []
     
     articles = []
     for entry in feed.entries[:limit]:
