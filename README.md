@@ -26,7 +26,7 @@
 <br/>
 
 <!-- CTA BUTTONS -->
-[![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-1B3A6B?style=for-the-badge)](https://your-live-demo-url.streamlit.app)
+[![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-1B3A6B?style=for-the-badge)](https://market-sentiment-analyser-ravikumar-3481.streamlit.app/)
 &nbsp;
 [![📄 Project Report](https://img.shields.io/badge/📄%20Project%20Report-View%20PDF-0F7B8C?style=for-the-badge)](https://your-project-report-link.com)
 
@@ -112,7 +112,7 @@ MarketPulse AI solves all three problems through a **Centralized Intelligence Pi
 ┌─────────────────────────────────────────────────────────┐
 │                   MarketPulse AI Stack                  │
 ├──────────────────┬──────────────────────────────────────┤
-│ Web Framework    │ Streamlit                            │
+│ Web Framework    │ Streamlit                            │          
 │ Data Ingestion   │ BeautifulSoup4 · Feedparser ·        │
 │                  │ Requests                             │
 │ Financial Data   │ yfinance                             │
@@ -132,28 +132,28 @@ MarketPulse AI solves all three problems through a **Centralized Intelligence Pi
 <div align="center">
 
 ### 🏠 Home — ML Pipeline Overview
-<img src="assets/screenshot-home.png" alt="Home Page" width="90%" />
+<img src="assets/home.png" alt="Home Page" width="90%" />
 
 <br/>
 
 ### 📊 Dashboard — Sentiment Analysis
-<img src="assets/screenshot-dashboard.png" alt="Dashboard" width="90%" />
+<img src="assets/Dashboard.png" alt="Dashboard" width="90%" />
 
 <br/>
 
 ### 📈 Market Data — Live Stock Chart
-<img src="assets/screenshot-market.png" alt="Market Data" width="90%" />
+<img src="assets/stock.png" alt="Market Data" width="90%" />
 
 <br/>
 
 ### 🔍 Deep-Dive Analysis
-<img src="assets/screenshot-deepdive.png" alt="Deep Dive" width="90%" />
+<img src="assets/scraped.png" alt="Deep Dive" width="90%" />
 
 </div>
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ Project Architecture & workflow
 
 ```
 MarketPulse AI
@@ -197,10 +197,10 @@ MarketPulse AI
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/marketpulse-ai.git
+git clone https://github.com/ravikumar-3481/market-sentiment-analyser.git
 
 # 2. Navigate into the project folder
-cd marketpulse-ai
+cd market-sentiment-analyser
 
 # 3. Create and activate a virtual environment
 python -m venv venv
@@ -253,15 +253,15 @@ praw
 
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/your-username)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ravikumar-3481)
 &nbsp;
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/your-profile)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ravi-vishwakarma67)
 &nbsp;
 [![Twitter / X](https://img.shields.io/badge/Twitter-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/your-handle)
 &nbsp;
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/your-handle)
 &nbsp;
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your-email@gmail.com)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:ravivish968@gmail.com)
 
 </div>
 
