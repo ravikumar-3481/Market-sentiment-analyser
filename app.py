@@ -335,6 +335,29 @@ def page_market_data():
                         fig.add_trace(go.Scatter(x=hist.index, y=hist['Close'].rolling(window=5).mean(), line=dict(color='orange', width=2), name='5-Day MA'))
                         fig.update_layout(template="plotly_dark", margin=dict(t=20, b=0, l=0, r=0), xaxis_rangeslider_visible=False, height=400)
                         st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Added Historical Data Table
+                        st.markdown("#### 📅 30-Day Historical Data")
+                        
+                        # Format the dataframe for clean display
+                        display_hist = hist.copy()
+                        display_hist.reset_index(inplace=True)
+                        
+                        # Ensure 'Date' column exists (yfinance index name can sometimes be 'Datetime')
+                        date_col = 'Date' if 'Date' in display_hist.columns else 'Datetime'
+                        display_hist[date_col] = display_hist[date_col].dt.strftime('%Y-%m-%d')
+                        
+                        # Select and round columns
+                        display_hist = display_hist[[date_col, 'Open', 'High', 'Low', 'Close', 'Volume']]
+                        display_hist.rename(columns={date_col: 'Date'}, inplace=True)
+                        display_hist[['Open', 'High', 'Low', 'Close']] = display_hist[['Open', 'High', 'Low', 'Close']].round(2)
+                        
+                        # Sort by Date descending (newest first)
+                        display_hist.sort_values(by='Date', ascending=False, inplace=True)
+                        
+                        # Render the table
+                        st.dataframe(display_hist, use_container_width=True, hide_index=True)
+                        
                     else:
                         st.error("Invalid ticker or no recent trading data found on Yahoo Finance.")
                 except Exception as e:
