@@ -21,7 +21,7 @@ export default function Dashboard({ newsData, setNewsData, query, setQuery, load
     setError(null);
     try {
       // Prepend dynamic API URL if configured
-      const apiHost = import.meta.env.VITE_API_URL || '';
+      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
       const response = await fetch(`${apiHost}/api/analyze?query=${encodeURIComponent(query)}&limit=${limit}`);
       if (!response.ok) {
         throw new Error('Failed to run sentiment analysis pipelines.');

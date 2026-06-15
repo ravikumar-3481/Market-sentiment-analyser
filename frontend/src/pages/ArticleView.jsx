@@ -34,7 +34,7 @@ export default function ArticleView({ article, setPage }) {
       setLoadingScrape(true);
       setScrapeError(null);
       try {
-        const apiHost = import.meta.env.VITE_API_URL || '';
+        const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
         const res = await fetch(`${apiHost}/api/scrape-article`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -74,7 +74,7 @@ export default function ArticleView({ article, setPage }) {
     setSummaryError(null);
     setSummary('');
     try {
-      const apiHost = import.meta.env.VITE_API_URL || '';
+      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
       const res = await fetch(`${apiHost}/api/summarize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -98,7 +98,7 @@ export default function ArticleView({ article, setPage }) {
     setEntitiesError(null);
     setEntities(null);
     try {
-      const apiHost = import.meta.env.VITE_API_URL || '';
+      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
       const res = await fetch(`${apiHost}/api/extract-entities`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

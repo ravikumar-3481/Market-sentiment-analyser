@@ -22,7 +22,7 @@ export default function MarketData() {
     setLoading(true);
     setError(null);
     try {
-      const apiHost = import.meta.env.VITE_API_URL || '';
+      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
       const response = await fetch(`${apiHost}/api/market-data?ticker=${encodeURIComponent(ticker)}`);
       if (!response.ok) {
         const errData = await response.json();
