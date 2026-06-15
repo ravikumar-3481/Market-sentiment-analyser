@@ -1,4 +1,15 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  LineChart, 
+  TrendingUp, 
+  TrendingDown, 
+  MessageSquare, 
+  DollarSign, 
+  Activity, 
+  Search,
+  AlertTriangle
+} from 'lucide-react';
 
 export default function MarketData() {
   const [ticker, setTicker] = useState('AAPL');
@@ -11,10 +22,11 @@ export default function MarketData() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/market-data?ticker=${encodeURIComponent(ticker)}`);
+      const apiHost = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiHost}/api/market-data?ticker=${encodeURIComponent(ticker)}`);
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.detail || 'Failed to load market data.');
+        throw new Error(errData.detail || 'Failed to load asset market data.');
       }
       const data = await response.json();
       setMarketData(data);
@@ -26,7 +38,7 @@ export default function MarketData() {
     }
   };
 
-  // Custom SVG Candlestick Chart Renderer
+  // Custom SVG Candlestick Chart Renderer with Framer Motion animations
   const renderCandlestickChart = (data) => {
     if (!data || data.length === 0) return null;
 
@@ -39,7 +51,6 @@ export default function MarketData() {
     const maxPrice = Math.max(...prices);
     const priceRange = maxPrice - minPrice;
     
-    // Add 5% padding to top and bottom of Y-axis
     const yMin = minPrice - priceRange * 0.05;
     const yMax = maxPrice + priceRange * 0.05;
     const yRange = yMax - yMin;
@@ -55,7 +66,7 @@ export default function MarketData() {
       return height - padding.bottom - ((val - yMin) / yRange) * chartHeight;
     };
 
-    const rectWidth = Math.max(4, ((width - padding.left - padding.right) / data.length) * 0.7);
+    const rectWidth = Math.max(5, ((width - padding.left - padding.right) / data.length) * 0.7);
 
     // Gridlines (4 levels)
     const gridLines = [];
@@ -82,7 +93,7 @@ export default function MarketData() {
     });
 
     return (
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
         <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} style={{ overflow: 'visible' }}>
           {/* Horizontal Gridlines */}
           {gridLines.map((line, idx) => (
@@ -97,9 +108,9 @@ export default function MarketData() {
                 strokeDasharray="4 4"
               />
               <text 
-                x={width - padding.right + 8} 
+                x={width - padding.right + 12} 
                 y={line.y + 4} 
-                fill="var(--text-muted)" 
+                fill="var(--text-secondary)" 
                 fontSize="0.75rem" 
                 fontFamily="monospace"
               >
@@ -108,7 +119,7 @@ export default function MarketData() {
             </g>
           ))}
 
-          {/* Candlesticks (Wick + Body) */}
+          {/* Candlesticks (Wick + Body) with Framer Motion entry */}
           {data.map((d, idx) => {
             const x = getX(idx);
             const yHigh = getY(d.High);
@@ -116,48 +127,57 @@ export default function MarketData() {
             const yOpen = getY(d.Open);
             const yClose = getY(d.Close);
             const isBullish = d.Close >= d.Open;
+            const candleHeight = Math.max(1, Math.abs(yOpen - yClose));
+            const color = isBullish ? 'var(--positive)' : 'var(--negative)';
 
             return (
               <g key={idx}>
                 {/* Wick */}
-                <line 
+                <motion.line 
                   x1={x} 
-                  y1={yHigh} 
+                  y1={yLow} 
                   x2={x} 
-                  y2={yLow} 
-                  stroke={isBullish ? 'var(--positive)' : 'var(--negative)'} 
+                  y2={yLow}
+                  animate={{ y1: yHigh }}
+                  transition={{ duration: 0.6, ease: 'easeOut', delay: idx * 0.01 }}
+                  stroke={color} 
                   strokeWidth="1.5"
                 />
                 {/* Body Rect */}
-                <rect 
+                <motion.rect 
                   x={x - rectWidth / 2} 
-                  y={Math.min(yOpen, yClose)} 
+                  y={isBullish ? yClose : yOpen} 
                   width={rectWidth} 
-                  height={Math.max(1, Math.abs(yOpen - yClose))} 
-                  fill={isBullish ? 'var(--positive)' : 'var(--negative)'}
-                  stroke={isBullish ? 'var(--positive)' : 'var(--negative)'}
+                  height={0} 
+                  animate={{ height: candleHeight }}
+                  transition={{ duration: 0.5, ease: 'backOut', delay: idx * 0.01 + 0.1 }}
+                  fill={color}
+                  stroke={color}
                   strokeWidth="1"
-                  rx="1"
+                  rx="1.5"
+                  style={{ transformOrigin: `${x}px ${isBullish ? yClose : yOpen}px` }}
                 />
               </g>
             );
           })}
 
-          {/* Moving Average Line */}
+          {/* Moving Average Line drawing animation */}
           {ma5Path && (
-            <path 
+            <motion.path 
               d={ma5Path} 
               fill="none" 
-              stroke="#f59e0b" 
+              stroke="#fbbf24" 
               strokeWidth="2.5" 
               strokeLinecap="round"
               strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.2, ease: 'easeInOut', delay: 0.4 }}
             />
           )}
 
           {/* X Axis Time Labels */}
           {data.map((d, idx) => {
-            // Label every 6th tick to prevent overlapping
             if (idx % 6 === 0 || idx === data.length - 1) {
               const x = getX(idx);
               const labelDate = new Date(d.Date);
@@ -166,10 +186,10 @@ export default function MarketData() {
                 <text 
                   key={idx} 
                   x={x} 
-                  y={height - 8} 
+                  y={height - 6} 
                   textAnchor="middle" 
-                  fill="var(--text-muted)" 
-                  fontSize="0.75rem"
+                  fill="var(--text-secondary)" 
+                  fontSize="0.72rem"
                 >
                   {formattedDate}
                 </text>
@@ -178,17 +198,17 @@ export default function MarketData() {
             return null;
           })}
         </svg>
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '12px', fontSize: '0.8rem', fontWeight: 600 }}>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '16px', fontSize: '0.8rem', fontWeight: 600 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '6px', backgroundColor: 'var(--positive)', display: 'inline-block' }}></span>
-            <span>Bullish Candle</span>
+            <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'var(--positive)' }}></span>
+            <span>Bullish</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '6px', backgroundColor: 'var(--negative)', display: 'inline-block' }}></span>
-            <span>Bearish Candle</span>
+            <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'var(--negative)' }}></span>
+            <span>Bearish</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '16px', height: '3px', backgroundColor: '#f59e0b', display: 'inline-block' }}></span>
+            <span style={{ width: '16px', height: '3px', backgroundColor: '#fbbf24', borderRadius: '2px', display: 'inline-block' }}></span>
             <span>5-Day SMA</span>
           </div>
         </div>
@@ -196,103 +216,135 @@ export default function MarketData() {
     );
   };
 
-  return (
-    <div>
-      <h2 style={{ marginBottom: '8px', fontSize: '1.8rem' }}>📈 Real-Time Market Data & Social Sentiment</h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-        Cross-references recent stock price geometry (Yahoo Finance) against retail/social media buzz indices harvested from Reddit.
-      </p>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80 } }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div>
+        <h2 style={{ marginBottom: '6px', fontSize: '1.8rem' }}>📈 Market Geometry & WSB Buzz</h2>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          Pairs technical stock movement algorithms (yFinance) directly with social chatter trends scraped from Reddit's WallStreetBets.
+        </p>
+      </div>
+
+      {/* Asset Search */}
       <div className="search-container">
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Stock Ticker Symbol</label>
-          <input 
-            type="text" 
-            className="input-field"
-            value={ticker}
-            onChange={(e) => setTicker(e.target.value.toUpperCase())}
-            placeholder="e.g. AAPL, TSLA, MSFT, NVDA, BTC-USD"
-            onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
-          />
+        <div className="input-wrapper">
+          <label className="input-label">Stock Ticker Symbol</label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', color: 'var(--text-secondary)' }} />
+            <input 
+              type="text" 
+              className="input-field"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value.toUpperCase())}
+              placeholder="e.g. AAPL, TSLA, MSFT, NVDA, BTC-USD"
+              style={{ paddingLeft: '48px' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
+            />
+          </div>
         </div>
-        <div style={{ alignSelf: 'flex-end' }}>
-          <button className="btn btn-primary" onClick={handleLoad} disabled={loading} style={{ height: '48px', padding: '0 32px' }}>
-            🔍 Query Financial Assets
-          </button>
-        </div>
+        <button className="btn btn-primary" onClick={handleLoad} disabled={loading} style={{ height: '49px' }}>
+          <LineChart size={16} /> Load Market Data
+        </button>
       </div>
 
       {loading && (
-        <div className="loading-container">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="loading-container"
+        >
           <div className="spinner"></div>
-          <h3>Connecting to Financial Servers</h3>
-          <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>
-            Loading market candlesticks and scraping Reddit sentiment tags...
+          <h3>Connecting to Financial Protocols</h3>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Retrieving candle history and crawling Reddit social networks...
           </p>
-        </div>
+        </motion.div>
       )}
 
       {error && (
-        <div className="alert alert-warning">
-          <span>⚠️ <strong>Load Failure:</strong> {error}</span>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="alert alert-warning"
+        >
+          <AlertTriangle size={18} />
+          <span><strong>Assets Query Failure:</strong> {error}</span>
+        </motion.div>
       )}
 
       {!loading && marketData && (
-        <div className="scraped-view">
-          {/* Main Chart Column */}
-          <div>
-            <div className="card" style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '16px' }}>
-                📊 {marketData.ticker} Price Action (Last 30 Days)
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="scraped-view"
+        >
+          {/* Chart Section */}
+          <div style={{ minWidth: 0 }}>
+            <motion.div variants={itemVariants} className="card" style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Activity size={18} style={{ color: 'var(--primary)' }} /> {marketData.ticker} Technical Matrix
               </h3>
               
-              {/* Asset Metrics Row */}
-              <div className="grid-3" style={{ marginBottom: '24px' }}>
-                <div style={{ padding: '16px', backgroundColor: 'var(--bg-accent)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>REAL-TIME CLOSE</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              {/* Technical indicators */}
+              <div className="grid-3" style={{ marginBottom: '28px' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(5, 7, 10, 0.3)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>CURRENT CLOSE</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0' }}>
                     ${marketData.metrics.latest_close.toFixed(2)}
                   </div>
                   <div style={{ 
-                    fontSize: '0.9rem', 
+                    fontSize: '0.85rem', 
                     fontWeight: 700, 
                     color: marketData.metrics.pct_change >= 0 ? 'var(--positive-dark)' : 'var(--negative-dark)',
-                    marginTop: '4px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}>
-                    {marketData.metrics.pct_change >= 0 ? '▲' : '▼'} {marketData.metrics.pct_change.toFixed(2)}%
+                    {marketData.metrics.pct_change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />} 
+                    {marketData.metrics.pct_change >= 0 ? '+' : ''}{marketData.metrics.pct_change.toFixed(2)}%
                   </div>
                 </div>
 
-                <div style={{ padding: '16px', backgroundColor: 'var(--bg-accent)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>30-DAY PERIOD HIGH</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(5, 7, 10, 0.3)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>30-DAY HIGH</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0' }}>
                     ${marketData.metrics.period_high.toFixed(2)}
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                    Resistance Level
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Resistance Ceiling
                   </div>
                 </div>
 
-                <div style={{ padding: '16px', backgroundColor: 'var(--bg-accent)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>30-DAY PERIOD LOW</div>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(5, 7, 10, 0.3)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>30-DAY LOW</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0' }}>
                     ${marketData.metrics.period_low.toFixed(2)}
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                    Support Level
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Support Floor
                   </div>
                 </div>
               </div>
 
-              {/* Chart Graphic SVG */}
+              {/* Candlestick Graphic */}
               {renderCandlestickChart(marketData.historical_data)}
-            </div>
+            </motion.div>
 
-            {/* Historical Data Table */}
-            <div className="card">
-              <h4 style={{ marginBottom: '16px' }}>📅 30-Day Price Matrix</h4>
-              <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {/* Historical Table */}
+            <motion.div variants={itemVariants} className="card">
+              <h4 className="card-title">Historical Price Matrix</h4>
+              <div className="table-container" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                 <table>
                   <thead>
                     <tr>
@@ -312,47 +364,52 @@ export default function MarketData() {
                         <td>${row.Open.toFixed(2)}</td>
                         <td style={{ color: 'var(--positive-dark)' }}>${row.High.toFixed(2)}</td>
                         <td style={{ color: 'var(--negative-dark)' }}>${row.Low.toFixed(2)}</td>
-                        <td style={{ fontWeight: 700 }}>${row.Close.toFixed(2)}</td>
-                        <td style={{ fontFamily: 'monospace' }}>{row.Volume.toLocaleString()}</td>
-                        <td style={{ color: '#b45309' }}>{row.MA5 ? `$${row.MA5.toFixed(2)}` : 'N/A'}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>${row.Close.toFixed(2)}</td>
+                        <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{row.Volume.toLocaleString()}</td>
+                        <td style={{ color: '#fbbf24', fontWeight: 600 }}>{row.MA5 ? `$${row.MA5.toFixed(2)}` : 'N/A'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Social Sentiment Column */}
-          <div className="ml-panel">
-            <h3 style={{ fontSize: '1.2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-              🗣️ Reddit WallStreetBets Pulse
+          {/* Social column */}
+          <motion.div variants={itemVariants} className="ml-panel">
+            <h3 style={{ fontSize: '1.15rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageSquare size={18} style={{ color: 'var(--primary)' }} /> r/WallStreetBets Index
             </h3>
 
             {marketData.reddit_sentiment.total_mentions > 0 ? (
-              <div>
-                <div style={{ fontSize: '0.9rem', marginBottom: '8px' }}>
-                  Total Mentions Analyzed: <strong>{marketData.reddit_sentiment.total_mentions}</strong>
-                </div>
-                
-                <div className="sentiment-progress-bar">
-                  <div 
-                    className="sentiment-progress-fill" 
-                    style={{ width: `${Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%` }}
-                  ></div>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '24px' }}>
-                  <span style={{ color: 'var(--positive-dark)' }}>
-                    Bullish: {Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%
-                  </span>
-                  <span style={{ color: 'var(--negative-dark)' }}>
-                    Bearish: {100 - Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%
-                  </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Analyzed Mentions:</span>
+                    <strong>{marketData.reddit_sentiment.total_mentions} posts</strong>
+                  </div>
+                  
+                  <div className="sentiment-progress-bar">
+                    <motion.div 
+                      className="sentiment-progress-fill" 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%` }}
+                      transition={{ duration: 1, ease: 'easeOut' }}
+                    ></motion.div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700 }}>
+                    <span style={{ color: 'var(--positive-dark)' }}>
+                      Bullish: {Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%
+                    </span>
+                    <span style={{ color: 'var(--negative-dark)' }}>
+                      Bearish: {100 - Math.round(marketData.reddit_sentiment.bullish_ratio * 100)}%
+                    </span>
+                  </div>
                 </div>
 
-                <h4 style={{ fontSize: '0.95rem', marginBottom: '12px' }}>Latest Retail Chatter:</h4>
-                <div style={{ maxHeight: '420px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginTop: '8px' }}>Retail Feed</h4>
+                <div style={{ maxHeight: '430px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
                   {marketData.reddit_sentiment.posts.map((post, idx) => (
                     <div 
                       key={idx} 
@@ -361,8 +418,8 @@ export default function MarketData() {
                         post.sentiment === 'Bearish' ? 'bearish' : 'neutral'
                       }`}
                     >
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.title}</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', lineHeight: '1.4' }}>{post.title}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '8px' }}>
                         <span>VADER Score: <strong style={{ 
                           color: post.sentiment === 'Bullish' ? 'var(--positive-dark)' : 
                                  post.sentiment === 'Bearish' ? 'var(--negative-dark)' : 'var(--neutral-dark)' 
@@ -374,21 +431,27 @@ export default function MarketData() {
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)' }}>
-                <p>No retail mentions found on WallStreetBets this week.</p>
-                <p style={{ fontSize: '0.8rem', marginTop: '6px' }}>It may be flying under retail radar.</p>
+              <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted)' }}>
+                <MessageSquare size={24} style={{ margin: '0 auto 12px auto', opacity: 0.4 }} />
+                <p style={{ fontSize: '0.85rem' }}>No recent chatter registered for this asset on WallStreetBets.</p>
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {!loading && !marketData && !error && (
-        <div className="loading-container" style={{ padding: '48px 24px', backgroundColor: '#f8fafc' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>
-            No stock ticker loaded. Enter an asset ticker (e.g. AAPL) and click the load button to render stock metrics.
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="loading-container" 
+          style={{ padding: '64px 24px', backgroundColor: 'rgba(12, 14, 20, 0.4)' }}
+        >
+          <Activity size={32} style={{ color: 'var(--text-muted)' }} />
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
+            No stock ticker loaded. Enter an asset ticker (e.g. AAPL, TSLA) and query to load technical analysis charts.
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   );

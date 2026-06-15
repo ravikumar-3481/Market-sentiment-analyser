@@ -1,51 +1,101 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Newspaper, 
+  Calendar, 
+  Globe, 
+  Sparkles, 
+  ChevronRight 
+} from 'lucide-react';
 
 export default function ScrapedArticles({ newsData, setPage, setSelectedArticle }) {
   if (!newsData || newsData.length === 0) {
     return (
-      <div className="loading-container" style={{ padding: '48px 24px' }}>
-        <h3 style={{ marginBottom: '8px' }}>No News Articles in Cache</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '16px', maxWidth: '500px' }}>
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="loading-container" 
+        style={{ padding: '64px 24px', backgroundColor: 'rgba(12, 14, 20, 0.4)' }}
+      >
+        <Newspaper size={32} style={{ color: 'var(--text-muted)' }} />
+        <h3 style={{ marginTop: '12px' }}>Cache Repository Empty</h3>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', maxWidth: '460px' }}>
           We haven't ingested or analyzed any headlines in this session yet. Please navigate to the Dashboard to run a sentiment sweep.
         </p>
         <button className="btn btn-primary" onClick={() => setPage('Dashboard')}>
           📊 Go to Dashboard
         </button>
-      </div>
+      </motion.div>
     );
   }
 
-  return (
-    <div>
-      <h2 style={{ marginBottom: '8px', fontSize: '1.8rem' }}>📰 Scraped Article Repository</h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-        Browse through the headlines currently loaded in this session. Click on <strong>Deep Dive Analysis</strong> to execute the custom web scraper and run AI Summarization or Entity Extraction on the full text.
-      </p>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  };
 
-      <div className="articles-list">
+  const cardVariants = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 100 } }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div>
+        <h2 style={{ marginBottom: '6px', fontSize: '1.8rem' }}>📰 Ingested Article Repository</h2>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          Browse through the headlines currently cached in your active session. Select **Deep Dive** to scrape full texts and run neural summary models.
+        </p>
+      </div>
+
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="articles-list"
+      >
         {newsData.map((article, idx) => {
           const isPositive = article.FinBERT_Label === 'Positive';
           const isNegative = article.FinBERT_Label === 'Negative';
           
-          let sentimentColor = 'var(--neutral)';
-          if (isPositive) sentimentColor = 'var(--positive)';
-          if (isNegative) sentimentColor = 'var(--negative)';
+          let sentimentLabel = 'Neutral';
+          let badgeClass = 'badge-neutral';
+          if (isPositive) {
+            sentimentLabel = 'Bullish';
+            badgeClass = 'badge-positive';
+          } else if (isNegative) {
+            sentimentLabel = 'Bearish';
+            badgeClass = 'badge-negative';
+          }
 
           return (
-            <div className="article-card-row" key={idx}>
+            <motion.div 
+              variants={cardVariants}
+              className="article-card-row" 
+              key={idx}
+            >
               <div className="article-info">
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                <h3 style={{ fontSize: '1.15rem', marginBottom: '8px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: '1.4' }}>
                   {article.title}
                 </h3>
                 
                 <div className="article-meta">
                   <span className="badge badge-topic">🏷️ {article.Topic || 'General'}</span>
-                  <span>🏢 Source: <strong>{article.source}</strong></span>
-                  <span>📅 Published: {new Date(article.published).toLocaleString()}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Globe size={14} /> Source: <strong>{article.source}</strong>
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Calendar size={14} /> {new Date(article.published).toLocaleDateString()}
+                  </span>
                 </div>
 
-                <div style={{ marginTop: '12px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  AI Sentiment Index: <span style={{ color: sentimentColor, fontWeight: 700 }}>{article.FinBERT_Label}</span> ({article.FinBERT_Confidence}% confidence)
+                <div style={{ marginTop: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>AI Index:</span>
+                  <span className={`badge ${badgeClass}`}>{sentimentLabel}</span> 
+                  <span style={{ color: 'var(--text-muted)' }}>({article.FinBERT_Confidence}% confidence)</span>
                 </div>
               </div>
 
@@ -56,15 +106,15 @@ export default function ScrapedArticles({ newsData, setPage, setSelectedArticle 
                     setSelectedArticle(article);
                     setPage('Article View');
                   }}
-                  style={{ whiteSpace: 'nowrap' }}
+                  style={{ whiteSpace: 'nowrap', padding: '10px 18px', fontSize: '0.85rem' }}
                 >
-                  🔍 Deep Dive Analysis
+                  <Sparkles size={14} style={{ color: 'var(--primary)' }} /> Deep Dive <ChevronRight size={14} />
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
