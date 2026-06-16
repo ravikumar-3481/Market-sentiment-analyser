@@ -3,7 +3,7 @@
  * from localStorage with dynamic fallback configurations.
  */
 
-export const DEFAULT_API_HOST = 'http://127.0.0.1:8000';
+export const DEFAULT_API_HOST = 'https://market-sentiment-analyser-1.onrender.com';
 
 export const getApiSettings = () => {
   const host = localStorage.getItem('marketpulse_api_host') || DEFAULT_API_HOST;
