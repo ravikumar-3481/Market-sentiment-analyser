@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+
 import warnings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
