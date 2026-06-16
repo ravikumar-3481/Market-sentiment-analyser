@@ -11,18 +11,26 @@ import {
   ChevronRight,
   AlertTriangle
 } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function Dashboard({ newsData, setNewsData, query, setQuery, loading, setLoading, error, setError }) {
   const [limit, setLimit] = useState(15);
+  const [loadingStage, setLoadingStage] = useState(0);
 
   const handleFetch = async () => {
     if (!query.trim()) return;
     setLoading(true);
     setError(null);
+    setLoadingStage(0);
+    const stageInterval = setInterval(() => {
+      setLoadingStage((prev) => {
+        if (prev < 2) return prev + 1;
+        return prev;
+      });
+    }, 2500);
+
     try {
-      // Prepend dynamic API URL if configured
-      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
-      const response = await fetch(`${apiHost}/api/analyze?query=${encodeURIComponent(query)}&limit=${limit}`);
+      const response = await apiFetch(`/api/analyze?query=${encodeURIComponent(query)}&limit=${limit}`);
       if (!response.ok) {
         throw new Error('Failed to run sentiment analysis pipelines.');
       }
@@ -31,6 +39,7 @@ export default function Dashboard({ newsData, setNewsData, query, setQuery, load
     } catch (err) {
       setError(err.message);
     } finally {
+      clearInterval(stageInterval);
       setLoading(false);
     }
   };
@@ -119,9 +128,17 @@ export default function Dashboard({ newsData, setNewsData, query, setQuery, load
           className="loading-container"
         >
           <div className="spinner"></div>
-          <h3>Running AI Inference Pipelines</h3>
+          <h3>{
+            loadingStage === 0 ? 'Querying global RSS headline networks...' :
+            loadingStage === 1 ? 'Normalizing text data and tokenizing phrases...' :
+            'Executing FinBERT sentiment and Zero-Shot topic engines...'
+          }</h3>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '500px' }}>
-            Downloading articles and running FinBERT transformer inference... This may take a few seconds if models are lazy-loading for the first time.
+            {
+              loadingStage === 0 ? 'Ingesting live articles for your query...' :
+              loadingStage === 1 ? 'Cleaning markup, extracting sentences, and mapping vocabulary...' :
+              'Resolving NLP sentiment scores. Eager background model pre-loading makes this instant!'
+            }
           </p>
         </motion.div>
       )}
@@ -342,7 +359,7 @@ export default function Dashboard({ newsData, setNewsData, query, setQuery, load
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="loading-container" 
-          style={{ padding: '64px 24px', backgroundColor: 'rgba(12, 14, 20, 0.4)' }}
+          style={{ padding: '64px 24px', backgroundColor: 'var(--bg-secondary)' }}
         >
           <Activity size={32} style={{ color: 'var(--text-muted)' }} />
           <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '480px' }}>

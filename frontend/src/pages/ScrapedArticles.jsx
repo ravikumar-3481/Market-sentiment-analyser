@@ -15,7 +15,7 @@ export default function ScrapedArticles({ newsData, setPage, setSelectedArticle 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         className="loading-container" 
-        style={{ padding: '64px 24px', backgroundColor: 'rgba(12, 14, 20, 0.4)' }}
+        style={{ padding: '64px 24px', backgroundColor: 'var(--bg-secondary)' }}
       >
         <Newspaper size={32} style={{ color: 'var(--text-muted)' }} />
         <h3 style={{ marginTop: '12px' }}>Cache Repository Empty</h3>

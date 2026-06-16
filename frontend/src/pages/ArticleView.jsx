@@ -13,6 +13,7 @@ import {
   MapPin,
   Tag
 } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function ArticleView({ article, setPage }) {
   const [loadingScrape, setLoadingScrape] = useState(false);
@@ -34,13 +35,14 @@ export default function ArticleView({ article, setPage }) {
       setLoadingScrape(true);
       setScrapeError(null);
       try {
-        const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
-        const res = await fetch(`${apiHost}/api/scrape-article`, {
+        const res = await apiFetch(`/api/scrape-article`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: article.link })
         });
         if (!res.ok) {
+          if (res.status === 401) {
+            throw new Error('Unauthorized: Invalid or missing API Key. Please verify settings.');
+          }
           throw new Error('Failed to scrape full article content.');
         }
         const data = await res.json();
@@ -74,13 +76,14 @@ export default function ArticleView({ article, setPage }) {
     setSummaryError(null);
     setSummary('');
     try {
-      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
-      const res = await fetch(`${apiHost}/api/summarize`, {
+      const res = await apiFetch(`/api/summarize`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: scrapedData.content })
       });
       if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error('Unauthorized: Invalid or missing API Key. Please verify settings.');
+        }
         throw new Error('Summarization neural network encountered an error.');
       }
       const data = await res.json();
@@ -98,13 +101,14 @@ export default function ArticleView({ article, setPage }) {
     setEntitiesError(null);
     setEntities(null);
     try {
-      const apiHost = 'https://market-sentiment-analyser-1.onrender.com';
-      const res = await fetch(`${apiHost}/api/extract-entities`, {
+      const res = await apiFetch(`/api/extract-entities`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: scrapedData.content })
       });
       if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error('Unauthorized: Invalid or missing API Key. Please verify settings.');
+        }
         throw new Error('Named entity extraction engine encountered an error.');
       }
       const data = await res.json();
@@ -186,11 +190,11 @@ export default function ArticleView({ article, setPage }) {
                 </div>
 
                 <img 
-                  src={scrapedData?.image_url || "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop"} 
+                  src={scrapedData?.image_url || "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000&auto=format&fit=crop"} 
                   alt="Article Banner" 
                   className="full-article-image" 
                   onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop";
+                    e.target.src = "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000&auto=format&fit=crop";
                   }}
                 />
 
@@ -199,7 +203,14 @@ export default function ArticleView({ article, setPage }) {
                 </h3>
                 
                 <div className="full-article-content">
-                  {scrapedData?.content || article.summary || "No body content resolved for this endpoint."}
+                  {scrapeError ? (
+                    <div className="alert alert-warning">
+                      <AlertTriangle size={18} />
+                      <span>{scrapeError}</span>
+                    </div>
+                  ) : (
+                    scrapedData?.content || article.summary || "No body content resolved for this endpoint."
+                  )}
                 </div>
               </div>
             </div>
@@ -214,7 +225,7 @@ export default function ArticleView({ article, setPage }) {
                 borderRadius: 'var(--radius-sm)',
                 boxShadow: sentimentGlow
               }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>NLP CLASSIFICATION</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>NLP CLASSIFICATION</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800, color: sentimentColor, margin: '2px 0' }}>
                   {sentimentLabel}
                 </div>
@@ -263,7 +274,7 @@ export default function ArticleView({ article, setPage }) {
                     animate={{ opacity: 1, scale: 1 }}
                     style={{ 
                       backgroundColor: 'rgba(16, 185, 129, 0.05)', 
-                      border: '1px solid var(--positive-dark)', 
+                      border: '1px solid var(--positive)', 
                       borderRadius: 'var(--radius-sm)', 
                       padding: '16px', 
                       fontSize: '0.88rem', 
@@ -337,8 +348,8 @@ export default function ArticleView({ article, setPage }) {
                       );
                     })}
                     {Object.values(entities).every(arr => arr.length === 0) && (
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                        No clear corporate entities extracted.
+                      <div style={{ display: 'flex', justifyContent: 'center', fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                        No corporate entities resolved.
                       </div>
                     )}
                   </motion.div>

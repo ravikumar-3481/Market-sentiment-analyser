@@ -18,7 +18,7 @@ export default function Home({ setPage }) {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
         delayChildren: 0.05
       }
     }
@@ -43,7 +43,7 @@ export default function Home({ setPage }) {
             <Sparkles size={12} /> Enterprise AI Intelligence
           </span>
           <h1 className="hero-title">MarketPulse AI</h1>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Real-Time Financial Sentiment Intelligence Terminal
           </h2>
           <p className="hero-subtitle">
@@ -63,7 +63,7 @@ export default function Home({ setPage }) {
         <div className="hero-image-container">
           <div className="hero-glow-back"></div>
           <img 
-            src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600&auto=format&fit=crop" 
+            src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=600&auto=format&fit=crop" 
             alt="Financial Markets Graph" 
             className="hero-image-placeholder"
           />
@@ -113,7 +113,7 @@ export default function Home({ setPage }) {
           <Database size={18} /> Automated Ingestion & Pipeline Stages
         </h3>
         <div className="grid-3">
-          <div style={{ padding: '16px', borderLeft: '3px solid var(--primary)', background: 'rgba(99, 102, 241, 0.02)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
+          <div style={{ padding: '16px', borderLeft: '3px solid var(--primary)', background: 'var(--bg-accent)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
             <h4 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
               <Search size={16} /> 1. Query & Scrape
             </h4>
@@ -122,7 +122,7 @@ export default function Home({ setPage }) {
             </p>
           </div>
           
-          <div style={{ padding: '16px', borderLeft: '3px solid var(--positive-dark)', background: 'rgba(16, 185, 129, 0.02)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
+          <div style={{ padding: '16px', borderLeft: '3px solid var(--positive)', background: 'var(--bg-accent)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
             <h4 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
               <TrendingUp size={16} /> 2. Model Inference
             </h4>
@@ -131,7 +131,7 @@ export default function Home({ setPage }) {
             </p>
           </div>
           
-          <div style={{ padding: '16px', borderLeft: '3px solid var(--neutral-dark)', background: 'rgba(245, 158, 11, 0.02)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
+          <div style={{ padding: '16px', borderLeft: '3px solid var(--neutral)', background: 'var(--bg-accent)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
             <h4 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
               <LineChart size={16} /> 3. Technical Overlay
             </h4>

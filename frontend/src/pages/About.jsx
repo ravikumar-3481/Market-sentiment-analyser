@@ -84,7 +84,7 @@ export default function About() {
               objectFit: 'cover', 
               margin: '0 auto 16px auto', 
               border: '3px solid var(--primary)',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)'
+              boxShadow: '0 4px 15px rgba(79, 70, 229, 0.2)'
             }}
             onError={(e) => {
               e.target.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=500&auto=format&fit=crop";
@@ -106,7 +106,7 @@ export default function About() {
               <Linkedin size={14} /> LinkedIn Connection
             </a>
             <a href="https://github.com/RAVIVISHWAKARMA2003" target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ fontSize: '0.85rem', padding: '12px', textDecoration: 'none' }}>
-              <Github size={14} /> GitHub Workpace
+              <Github size={14} /> GitHub Workspace
             </a>
           </div>
         </motion.div>
